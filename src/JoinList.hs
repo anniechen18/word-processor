@@ -22,5 +22,5 @@ tag (Append m _ _) = m
 (+++) (Append m (Single a b) (Single x y)) (Single n c) = Append (mappend m n) (Append m (Single a b) (Single x y)) (Single n c)
 (+++) (Single n c) (Append m (Single a b) (Single x y)) = Append (mappend n m) (Single n c) (Append m (Single a b) (Single x y))
 (+++) (Append m (Single a b) (Single c d)) (Append n (Single e f) (Single g h)) = Append (mappend m n) (Append m (Single a b) (Single c d)) (Append n (Single e f) (Single g h))
-
+(+++) (Append m a b) (Append n c d) = Append (mappend m n) (Append m a b) (Append n c d)
 
