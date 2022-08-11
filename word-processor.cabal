@@ -27,7 +27,7 @@ library
   exposed-modules:
       Buffer
       Editor
-      Lib
+      JoinList
       Sized
       StringBuffer
   other-modules:
