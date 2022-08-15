@@ -1,5 +1,7 @@
 module JoinList where
 
+import Sized
+
 data JoinList m a = Empty
   | Single m a
   | Append m (JoinList m a) (JoinList m a)
@@ -7,13 +9,11 @@ data JoinList m a = Empty
 
 
 tag :: Monoid m => JoinList m a -> m
---mempty returns unit. how do we invoke the mempty of m? i.e. should return product 1 if m is product
--- Empty nodes do not explicitly store an annotation, but we consider them to have an annotation of mempty (that is, the identity element for the given monoid).
 tag Empty = mempty
 tag (Single m _) = m
 tag (Append m _ _) = m
 
-
+-- TODO: use infix notation to make it more readable
 (+++) :: Monoid m => JoinList m a -> JoinList m a -> JoinList m a
 (+++) Empty Empty = Empty
 (+++) Empty a = a
@@ -24,3 +24,14 @@ tag (Append m _ _) = m
 (+++) (Append m (Single a b) (Single c d)) (Append n (Single e f) (Single g h)) = Append (mappend m n) (Append m (Single a b) (Single c d)) (Append n (Single e f) (Single g h))
 (+++) (Append m a b) (Append n c d) = Append (mappend m n) (Append m a b) (Append n c d)
 
+indexJ :: (Sized b, Monoid b) => Int -> JoinList b a -> Maybe a
+
+indexJ _ Empty = Nothing
+indexJ i _ | i < 0 = Nothing
+indexJ i (Single m a) 
+  | i > 0 = Nothing
+  | i == 0 = Just a
+indexJ i (Append m jl1 jl2)
+  | i < s1 = indexJ i jl1
+  | i > s1 = indexJ (i - s1) jl2
+  where s1 = getSize . size $ tag jl1
