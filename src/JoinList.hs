@@ -48,6 +48,18 @@ dropJ n (Append m jl1 jl2)
   | otherwise = dropJ (n - s1) jl2
   where s1 = getSize . size $ tag jl1
 
+-- Take first n elements form a join list
+takeJ :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
+takeJ _ Empty = Empty
+takeJ n jl | n <= 0 = jl
+takeJ n (Append m jl1 jl2)
+  | n == s1 = jl1
+  | n < s1 = takeJ n jl1
+  | otherwise = jl1 +++ takeJ (n - s1) jl2
+  where s1 = getSize . size $ tag jl1
+
+
+
 
 
 
