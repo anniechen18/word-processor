@@ -26,6 +26,7 @@ tag (Append m _ _) = m
 
 indexJ :: (Sized b, Monoid b) => Int -> JoinList b a -> Maybe a
 
+-- Retreives the element at index i, O(log(n)) time with size cached
 indexJ _ Empty = Nothing
 indexJ i _ | i < 0 = Nothing
 indexJ i (Single m a) 
@@ -35,3 +36,18 @@ indexJ i (Append m jl1 jl2)
   | i < s1 = indexJ i jl1
   | i > s1 = indexJ (i - s1) jl2
   where s1 = getSize . size $ tag jl1
+
+-- Drops the first n elements from a join list
+dropJ :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
+dropJ _ Empty = Empty
+dropJ n jl | n <= 0 = jl
+dropJ n (Single _ _) = Empty
+dropJ n (Append m jl1 jl2) 
+  | n == s1 = jl2
+  | n < s1 = (dropJ n jl1) +++ jl2
+  | otherwise = dropJ (n - s1) jl2
+  where s1 = getSize . size $ tag jl1
+
+
+
+
