@@ -1,6 +1,7 @@
 module JoinList where
 
 import Sized
+import Buffer
 
 data JoinList m a = Empty
   | Single m a
@@ -23,6 +24,8 @@ tag (Append m _ _) = m
 (+++) (Single n c) (Append m (Single a b) (Single x y)) = Append (mappend n m) (Single n c) (Append m (Single a b) (Single x y))
 (+++) (Append m (Single a b) (Single c d)) (Append n (Single e f) (Single g h)) = Append (mappend m n) (Append m (Single a b) (Single c d)) (Append n (Single e f) (Single g h))
 (+++) (Append m a b) (Append n c d) = Append (mappend m n) (Append m a b) (Append n c d)
+ (+++) (Append m a b) (Single c d) = Append (mappend m c)(Append m a b) (Single c d) 
+
 
 indexJ :: (Sized b, Monoid b) => Int -> JoinList b a -> Maybe a
 
@@ -33,8 +36,9 @@ indexJ i (Single m a)
   | i > 0 = Nothing
   | i == 0 = Just a
 indexJ i (Append m jl1 jl2)
-  | i < s1 = indexJ i jl1
-  | i > s1 = indexJ (i - s1) jl2
+  | i >= (getSize . size m) = Nothing -- out of bounds
+  | i < s1 = indexJ i jl1 -- traverse left tree
+  | otherwise = indexJ (i - s1) jl2 
   where s1 = getSize . size $ tag jl1
 
 -- Drops the first n elements from a join list
@@ -59,7 +63,13 @@ takeJ n (Append m jl1 jl2)
   where s1 = getSize . size $ tag jl1
 
 
-
+instance Buffer (JoinList Size String) where
+  toString Empty = ""
+  toString (Single m a) = a
+  toString (Append m jl1 jl2) = (toString jl1) ++ (toString jl2)
+ 
+  fromString "" = Empty
+  fromString strInput = foldl (+++) Empty (map $ lines strInput)
 
 
 
